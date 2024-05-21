@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "config.h"
 
 char* trim(char* val) 
@@ -45,8 +46,8 @@ int read_config(const char *filename, Config *config)
 
         val[strcspn(val, "\n")] = '\0'; /* Remove newline if present */
 
-        if (strcmp(key, "INTERVAL_MINUTES") == 0)
-            config->interval_mins = atoi(val);
+        if (strcmp(key, "INTERVAL_SECONDS") == 0)
+            config->interval_sec = atoi(val);
         else if (strcmp(key, "PROJECT_NAME") == 0)
             strncpy(config->project_name, val, sizeof(config->project_name));
     }
