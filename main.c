@@ -4,9 +4,13 @@
 #include <stdarg.h>
 #include <string.h>
 
-#define TIMESTAMP_LENGTH 20
+#include "config.h"
 
-void run_command(const char* cmd) {
+#define TIMESTAMP_LENGTH 20
+#define CONFIG_PATH "config.ttu"
+
+void run_command(const char* cmd) 
+{
     system(cmd);
 }
 
@@ -78,13 +82,18 @@ char* unix_timestamp()
 
 int main() 
 {
-    char* timestamp = unix_timestamp();
+    Config config;
+    read_config(CONFIG_PATH, &config);
+
+    char *timestamp = unix_timestamp();
     if (timestamp == NULL)
         return 1;
 
-    printf("time: %s\n", timestamp);
+    char interval_str[20];
+    snprintf(interval_str, sizeof(interval_str), "%d", config.interval_mins);
     
-    char *full_cmd = concat_strs("echo \"", timestamp, "\"", NULL);
+    char *full_cmd = concat_strs("echo \"timestamp: ", timestamp, "\nInterval: ", interval_str, "\nProject Name: ", config.project_name, "\"", NULL);
+
     if (full_cmd != NULL) {
         run_command(full_cmd);
         free(full_cmd);
