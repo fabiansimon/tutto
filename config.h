@@ -1,7 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define CONFIG_LINE_BUFFER_SIZE 256
+#include "macros.h"
 
 typedef struct {
     char project_name[CONFIG_LINE_BUFFER_SIZE/2];

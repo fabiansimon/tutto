@@ -7,22 +7,41 @@
 
 #include "config.h"
 #include "utils.h"
-#include "tutto.h"
-
-#define CONFIG_PATH "config.ttu"
-
-void run_command(const char* cmd) 
-{
-    system(cmd);
-}
+#include "dir.h"
+#include "logger.h"
 
 int main() 
 {
+    char wd[PATH_MAX];
+    project_path(wd, sizeof(wd));
+
+    char *git_dir = concat_strs(wd, "/", ".git", NULL);
+    char *config_file = concat_strs(wd, "/", "config.tutu", NULL);
+
+    if (dir_exist(config_file) == 0)
+    {
+        print_error("No config file found. Press Y to initialize one.");
+
+        char input[3];
+        if (!binary_input(input, sizeof(input), "Y"))
+            exit(0);
+
+        init_config();
+    }
+
+    if (dir_exist(git_dir) == 0)
+    {
+        print_error("Git not found, run \"git init\" or allow us to initialize a git directory by pressing \"Y\".");
+
+        char input[3];
+        if (!binary_input(input, sizeof(input), "Y"))
+            exit(0);
+
+        init_git();
+    }
+
     Config config;
     read_config(CONFIG_PATH, &config);
-
-    char wd[PATH_MAX];
-    total_path(wd, sizeof(wd));
 
     for (;;) 
     {

@@ -8,13 +8,13 @@ CFLAGS = -Wall -Wextra -Werror
 TARGET = main
 
 # Source files
-SRCS = main.c config.c utils.c tutto.c
+SRCS = main.c config.c utils.c dir.c logger.c
 
 # Object files
 OBJS = $(SRCS:.c=.o)
 
 # Header files
-HDRS = config.h utils.h tutto.h
+HDRS = config.h utils.h macros.h dir.h logger.h
 
 # Default target
 all: $(TARGET)

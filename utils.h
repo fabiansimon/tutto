@@ -4,6 +4,7 @@
 char *concat_strs(const char *first, ...);
 char *unix_timestamp();
 void timeout(int seconds);
-void total_path(char *buff, size_t size);
+void run_command(const char *cmd);
+int binary_input(char *input, size_t size, char *expected);
 
 #endif

@@ -4,17 +4,12 @@
 #include <stdarg.h>
 #include <string.h>
 
-#ifdef _WIN32
-#include <windows.h>
-#else
+#include <mach-o/dyld.h>
 #include <unistd.h>
 #include <limits.h>
-#endif
-
 
 #include "utils.h"
-
-#define TIMESTAMP_LENGTH 20
+#include "macros.h"
 
 char* concat_strs(const char* first, ...)
 {
@@ -85,33 +80,25 @@ char* unix_timestamp()
 
 void timeout(int seconds) 
 {
-    #ifdef _WIN32
-        Sleep(seconds * 1000); // Windows takes ms
-    #else
-        sleep(seconds);
-    #endif
+    /* Cross Platform implementation needed */
+    sleep(seconds);
 }
 
-void total_path(char* buff, size_t size)
+void run_command(const char* cmd) 
 {
-    #ifdef _WIN32
-        if (GetModuleFileName(NULL, buff, size) == 0)
+    system(cmd);
+}
+
+int binary_input(char* input, size_t size, char* expected)
+{
+    if (fgets(input, size, stdin) != NULL)
+    {
+        input[strcspn(input, "\n")] = 0;
+        if (strcasecmp(input, expected) == 0)
         {
-            fprintf(stderr, "Failed to get executable path.\n");
-            exit(EXIT_FAILURE);
+            return 1;
         }
-    #else
-         char temp_path[PATH_MAX];
-        if (realpath("/proc/self/exe", temp_path) == NULL) {
-            fprintf(stderr, "Failed to get executable path.\n");
-            exit(EXIT_FAILURE);
-        }
-        // Ensure the buffer size is not exceeded
-        if (strlen(temp_path) >= size) {
-            fprintf(stderr, "Buffer size is too small for the executable path.\n");
-            exit(EXIT_FAILURE);
-        }
-        strncpy(buff, temp_path, size - 1);
-        buff[size - 1] = '\0';
-    #endif
+    }
+
+    return 0;
 }

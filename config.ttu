@@ -1,4 +1,0 @@
-# Simple TTU config file
-INTERVAL_SECONDS=10 
-# Test Command
-PROJECT_NAME = Tuto Repo
