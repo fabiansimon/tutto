@@ -17,6 +17,10 @@
     "INTERVAL_SECONDS=10\n" \
     "PROJECT_NAME=Project Example\n" 
 
+/* Snapshot hidden directoy */
+#define SNAP_DIRECTORY_NAME ".tutu_snap"
+#define SNAP_DIRECTORY_MODE 0755
+
 /* Color Macros */
 #define RED_TEXT "\x1b[31m"
 #define GREEN_TEXT "\x1b[32m"

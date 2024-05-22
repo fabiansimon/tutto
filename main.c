@@ -16,8 +16,10 @@ int main()
     project_path(wd, sizeof(wd));
 
     char *git_dir = concat_strs(wd, "/", ".git", NULL);
-    char *config_file = concat_strs(wd, "/", "config.tutu", NULL);
+    char *snap_dir = concat_strs(wd, "/", SNAP_DIRECTORY_NAME, NULL);
+    char *config_file = concat_strs(wd, "/", CONFIG_PATH, NULL);
 
+    /* Check if Tutu config file exists */
     if (dir_exist(config_file) == 0)
     {
         print_error("No config file found. Press Y to initialize one.");
@@ -29,6 +31,7 @@ int main()
         init_config();
     }
 
+    /* Check if Git is already initalized */
     if (dir_exist(git_dir) == 0)
     {
         print_error("Git not found, run \"git init\" or allow us to initialize a git directory by pressing \"Y\".");
@@ -39,6 +42,10 @@ int main()
 
         init_git();
     }
+
+    /* Create hidden .tutu_snap file if none exists */
+    if (dir_exist(snap_dir) == 0)
+        init_dir(snap_dir);
 
     Config config;
     read_config(CONFIG_PATH, &config);

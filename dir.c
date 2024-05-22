@@ -34,12 +34,20 @@ void project_path(char* buff, uint32_t size)
 
 int dir_exist(const char* path)
 {
-    printf("wd %s\n", path);
     struct stat statbuf;
     if (stat(path, &statbuf) != 0)
         return 0;
 
     return S_ISDIR(statbuf.st_mode);
+}
+
+void init_dir(const char *full_path)
+{
+    if (mkdir(full_path, SNAP_DIRECTORY_MODE) != 0)
+    {
+        perror("Error creating directory.");
+        exit(0);
+    }
 }
 
 void init_git()
