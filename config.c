@@ -47,9 +47,9 @@ int read_config(const char *filename, Config *config)
         val[strcspn(val, "\n")] = '\0'; /* Remove newline if present */
 
         if (strcmp(key, "INTERVAL_SECONDS") == 0)
-            config->interval_sec = atoi(val);
+            config->interval = atoi(val);
         else if (strcmp(key, "PROJECT_NAME") == 0)
-            strncpy(config->project_name, val, sizeof(config->project_name));
+            strncpy(config->name, val, sizeof(config->name));
     }
 
     fclose(file);

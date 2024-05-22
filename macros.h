@@ -1,13 +1,15 @@
 #ifndef MACROS_H
 #define MACROS_H
 
+/* Randos */
 #define CONCATENATE(a, b) a b
+#define TIMESTAMP_LENGTH 20
+#define GIT_DIFF_BUFFER_SIZE 65536
 
 /* Naming Macros */
 #define PROJECT_NAME "Tutu"
 #define PROJECT_ENDING "tutu"
 
-#define TIMESTAMP_LENGTH 20
 
 /* Config Macros */
 #define CONFIG_LINE_BUFFER_SIZE 256

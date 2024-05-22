@@ -9,6 +9,7 @@
 #include <limits.h>
 
 #include "utils.h"
+#include "logger.h"
 #include "macros.h"
 
 char* concat_strs(const char* first, ...)
@@ -87,6 +88,89 @@ void timeout(int seconds)
 void run_command(const char* cmd) 
 {
     system(cmd);
+}
+
+void run_command_output(const char *cmd, char *output, size_t size)
+{
+    FILE *pipe = popen(cmd, "r");
+    if (pipe == NULL)
+    {
+        perror("Error while creating pipe.");
+        exit(0);
+    }
+
+    char buff[128];
+    size_t curr_length = 0;
+
+    output[0] = '\0';
+
+    while (fgets(buff, sizeof(buff), pipe) != NULL)
+    {
+        size_t buff_length = strlen(buff);
+
+        if (curr_length + buff_length >= size -1)
+        {
+            //fprintf(stderr, "Output buffer is too small");
+            break;
+        }
+
+        strcat(output, buff);
+        curr_length += buff_length;
+    }
+
+    int status = pclose(pipe);
+    if (status == -1)
+    {
+        perror("Error while closing pipe.");
+        exit(0);
+    }
+}
+
+void run_command_file(const char* cmd, const char* filename)
+{
+    char buffer[128];
+    run_command_output(cmd, buffer, sizeof(buffer));
+
+    if (buffer[0] == '\0') {
+        print_info("No changes detected.");
+        return;
+    }
+
+    // Clean buffer to reuse for file
+    memset(buffer, 0, sizeof(buffer));
+
+    FILE *pipe = popen(cmd, "r");
+    if (pipe == NULL)
+    {
+        perror("Error while creating pipe.");
+        exit(0);
+    }
+
+    FILE *file = fopen(filename, "w");
+    if (file == NULL)
+    {
+        perror("Error while opening file");
+        pclose(pipe);
+        exit(0);
+    }
+
+    while (fgets(buffer, sizeof(buffer), pipe) != NULL)
+    {
+        fprintf(file, "%s", buffer);
+    }
+
+    int status = pclose(pipe);
+    if (status == -1)
+    {
+        perror("Error while closing pipe.");
+        exit(0);
+    }
+
+    if (fclose(file) != 0)
+    {
+        perror("Error while closing file.");
+        exit(0);
+    }
 }
 
 int binary_input(char* input, size_t size, char* expected)

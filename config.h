@@ -4,8 +4,9 @@
 #include "macros.h"
 
 typedef struct {
-    char project_name[CONFIG_LINE_BUFFER_SIZE/2];
-    int interval_sec;
+    char name[CONFIG_LINE_BUFFER_SIZE/2];
+    int interval; // In seconds
+    char path[CONFIG_LINE_BUFFER_SIZE];
 } Config;
 
 int read_config(const char *filename, Config *config);
