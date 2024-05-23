@@ -8,7 +8,7 @@ CFLAGS = -Wall -Wextra -Werror
 TARGET = main
 
 # Source files
-SRCS = main.c config.c utils.c dir.c logger.c
+SRCS = main.c config.c utils.c dir.c logger.c tutu.c
 
 # Object files directory
 OBJDIR = obj
@@ -17,7 +17,7 @@ OBJDIR = obj
 OBJS = $(SRCS:%.c=$(OBJDIR)/%.o)
 
 # Header files
-HDRS = config.h utils.h macros.h dir.h logger.h
+HDRS = config.h utils.h macros.h dir.h logger.h tutu.h
 
 # Default target
 all: $(TARGET)

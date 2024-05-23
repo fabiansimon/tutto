@@ -1,0 +1,264 @@
+diff --git a/.vscode/settings.json b/.vscode/settings.json
+index 82ddd76..5efbab4 100644
+--- a/.vscode/settings.json
++++ b/.vscode/settings.json
+@@ -14,6 +14,12 @@
+     "string": "c",
+     "string_view": "c",
+     "unordered_map": "c",
+-    "vector": "c"
++    "vector": "c",
++    "tutu.h": "c",
++    "util.h": "c",
++    "logger.h": "c",
++    "stdbool.h": "c",
++    "macros.h": "c",
++    "dir.h": "c"
+   }
+ }
+diff --git a/Makefile b/Makefile
+index d7ff597..9220296 100644
+--- a/Makefile
++++ b/Makefile
+@@ -8,7 +8,7 @@ CFLAGS = -Wall -Wextra -Werror
+ TARGET = main
+ 
+ # Source files
+-SRCS = main.c config.c utils.c dir.c logger.c
++SRCS = main.c config.c utils.c dir.c logger.c tutu.c
+ 
+ # Object files directory
+ OBJDIR = obj
+@@ -17,7 +17,7 @@ OBJDIR = obj
+ OBJS = $(SRCS:%.c=$(OBJDIR)/%.o)
+ 
+ # Header files
+-HDRS = config.h utils.h macros.h dir.h logger.h
++HDRS = config.h utils.h macros.h dir.h logger.h tutu.h
+ 
+ # Default target
+ all: $(TARGET)
+diff --git a/config.c b/config.c
+index 830ebc8..6fa8bb4 100644
+--- a/config.c
++++ b/config.c
+@@ -22,7 +22,7 @@ int read_config(const char *filename, Config *config)
+     FILE *file = fopen(filename, "r");
+     if (file == NULL)
+     {
+-        perror("Error opening *.ttu file");
++        perror("Error opening *.tutu file");
+         return -1;
+     }
+ 
+@@ -36,7 +36,7 @@ int read_config(const char *filename, Config *config)
+         char *delimiter = strchr(line, '=');
+         if (delimiter == NULL)
+         {
+-            fprintf(stderr, "Invalid .ttu config line: %s.\n", line);
++            fprintf(stderr, "Invalid .tutu config line: %s.\n", line);
+             continue;
+         }
+ 
+diff --git a/dir.c b/dir.c
+index 6ac2a56..cc32693 100644
+--- a/dir.c
++++ b/dir.c
+@@ -32,13 +32,26 @@ void project_path(char* buff, uint32_t size)
+     }
+ }
+ 
+-int dir_exist(const char* path)
++int file_exists(const char* path)
++{
++    return exists(path, false);
++}
++
++int dir_exists(const char* path)
++{
++    return exists(path, true);
++}
++
++int exists(const char* path, bool is_directory)
+ {
+     struct stat statbuf;
+     if (stat(path, &statbuf) != 0)
+         return 0;
+ 
+-    return S_ISDIR(statbuf.st_mode);
++    if (is_directory)
++        return S_ISDIR(statbuf.st_mode);
++
++    return S_ISREG(statbuf.st_mode);
+ }
+ 
+ void init_dir(const char *full_path)
+diff --git a/dir.h b/dir.h
+index 776f775..86048c9 100644
+--- a/dir.h
++++ b/dir.h
+@@ -1,7 +1,11 @@
+ #ifndef DIR_H
+ #define DIR_H
+ 
+-int dir_exist(const char *path);
++#include <stdbool.h>
++
++int dir_exists(const char* path);
++int file_exists(const char* path);
++int exists(const char *path, bool is_directory);
+ void init_dir(const char *full_path);
+ void project_path(char *buff, uint32_t size);
+ void init_git();
+diff --git a/macros.h b/macros.h
+index 4422ad0..374858c 100644
+--- a/macros.h
++++ b/macros.h
+@@ -16,7 +16,7 @@
+ #define CONFIG_PATH "config." PROJECT_ENDING
+ #define CONFIG_INIT_CONTENT \
+     "# Simple TUTU config file\n" \
+-    "INTERVAL_SECONDS=10\n" \
++    "INTERVAL_SECONDS=60\n" \
+     "PROJECT_NAME=Project Example\n" 
+ 
+ /* Snapshot hidden directoy */
+diff --git a/main b/main
+index e099e9e..f6af8f4 100755
+Binary files a/main and b/main differ
+diff --git a/main.c b/main.c
+index 5556181..38c1a2a 100644
+--- a/main.c
++++ b/main.c
+@@ -9,6 +9,7 @@
+ #include "utils.h"
+ #include "dir.h"
+ #include "logger.h"
++#include "tutu.h"
+ 
+ int main() 
+ {
+@@ -23,14 +24,8 @@ int main()
+     char *snap_dir = concat_strs(config.path, "/", SNAP_DIRECTORY_NAME, NULL);
+     char *config_file = concat_strs(config.path, "/", CONFIG_PATH, NULL);
+ 
+-    const char *timestamp = unix_timestamp();
+-    char *snap_file_path = concat_strs(snap_dir, "/", timestamp);
+-    run_command_file("git diff", snap_file_path);
+-
+-    return 0; 
+-
+     /* Check if Tutu config file exists */
+-    if (dir_exist(config_file) == 0)
++    if (file_exists(config_file) == 0)
+     {
+         print_error("No config file found. Press Y to initialize one.");
+ 
+@@ -42,7 +37,7 @@ int main()
+     }
+ 
+     /* Check if Git is already initalized */
+-    if (dir_exist(git_dir) == 0)
++    if (dir_exists(git_dir) == 0)
+     {
+         print_error("Git not found, run \"git init\" or allow us to initialize a git directory by pressing \"Y\".");
+ 
+@@ -54,7 +49,7 @@ int main()
+     }
+ 
+     /* Create hidden .tutu_snap file if none exists */
+-    if (dir_exist(snap_dir) == 0)
++    if (dir_exists(snap_dir) == 0)
+         init_dir(snap_dir);
+ 
+     read_config(CONFIG_PATH, &config);
+@@ -62,25 +57,9 @@ int main()
+     for (;;) 
+     {
+         printf("Called, now timeout for %d seconds.\n", config.interval);
+-
++        take_snap(snap_dir);
+         timeout(config.interval);
+     }
+ 
+-    /*
+-    char *timestamp = unix_timestamp();
+-    if (timestamp == NULL)
+-        return 1;
+-
+-    char interval_str[20];
+-    snprintf(interval_str, sizeof(interval_str), "%d", config.interval_mins);
+-
+-    char *full_cmd = concat_strs("echo \"timestamp: ", timestamp, "\nInterval: ", interval_str, "\nProject Name: ", config.project_name, "\"", NULL);
+-
+-    if (full_cmd != NULL) {
+-        run_command(full_cmd);
+-        free(full_cmd);
+-    }
+-    */
+-
+     return 0;
+ }
+\ No newline at end of file
+diff --git a/obj/config.o b/obj/config.o
+index 9ee5477..b807bbf 100644
+Binary files a/obj/config.o and b/obj/config.o differ
+diff --git a/obj/dir.o b/obj/dir.o
+index f1131c4..0888e40 100644
+Binary files a/obj/dir.o and b/obj/dir.o differ
+diff --git a/obj/main.o b/obj/main.o
+index 12fffa3..17c54e9 100644
+Binary files a/obj/main.o and b/obj/main.o differ
+diff --git a/obj/utils.o b/obj/utils.o
+index abcb529..ca3d4e6 100644
+Binary files a/obj/utils.o and b/obj/utils.o differ
+diff --git a/tutu.c b/tutu.c
+index 11cc80a..1e48244 100644
+--- a/tutu.c
++++ b/tutu.c
+@@ -1,7 +1,15 @@
+-#include "util.h"
++#include <stdio.h>
++
++#include "utils.h"
+ #include "tutu.h"
++#include "logger.h"
+ 
+-void take_snap() 
++void take_snap(const char* snap_dir) 
+ {
+-    char* timestamp = unix_timestamp()
++    print_info("Updating Snapshot...");
++    
++    char *timestamp = unix_timestamp();
++    char *snap_file_path = concat_strs(snap_dir, "/", timestamp, NULL);
++    printf("Hello World");
++    run_command_file("git diff", snap_file_path);
+ }
+\ No newline at end of file
+diff --git a/tutu.h b/tutu.h
+index 58c0711..335720f 100644
+--- a/tutu.h
++++ b/tutu.h
+@@ -1,6 +1,6 @@
+ #ifndef TUTU_H
+ #define TUTU_H
+ 
+-void take_snap();
++void take_snap(const char *snap_dir);
+ 
+ #endif
+\ No newline at end of file
+diff --git a/utils.c b/utils.c
+index 34948de..c6aa750 100644
+--- a/utils.c
++++ b/utils.c
+@@ -171,6 +171,8 @@ void run_command_file(const char* cmd, const char* filename)
+         perror("Error while closing file.");
+         exit(0);
+     }
++
++    print_info("Changes updated.");
+ }
+ 
+ int binary_input(char* input, size_t size, char* expected)

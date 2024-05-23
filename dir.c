@@ -32,13 +32,26 @@ void project_path(char* buff, uint32_t size)
     }
 }
 
-int dir_exist(const char* path)
+int file_exists(const char* path)
+{
+    return exists(path, false);
+}
+
+int dir_exists(const char* path)
+{
+    return exists(path, true);
+}
+
+int exists(const char* path, bool is_directory)
 {
     struct stat statbuf;
     if (stat(path, &statbuf) != 0)
         return 0;
 
-    return S_ISDIR(statbuf.st_mode);
+    if (is_directory)
+        return S_ISDIR(statbuf.st_mode);
+
+    return S_ISREG(statbuf.st_mode);
 }
 
 void init_dir(const char *full_path)

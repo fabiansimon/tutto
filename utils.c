@@ -171,6 +171,8 @@ void run_command_file(const char* cmd, const char* filename)
         perror("Error while closing file.");
         exit(0);
     }
+
+    print_info("Changes updated.");
 }
 
 int binary_input(char* input, size_t size, char* expected)

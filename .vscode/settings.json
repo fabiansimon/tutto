@@ -14,6 +14,12 @@
     "string": "c",
     "string_view": "c",
     "unordered_map": "c",
-    "vector": "c"
+    "vector": "c",
+    "tutu.h": "c",
+    "util.h": "c",
+    "logger.h": "c",
+    "stdbool.h": "c",
+    "macros.h": "c",
+    "dir.h": "c"
   }
 }

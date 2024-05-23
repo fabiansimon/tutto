@@ -16,7 +16,7 @@
 #define CONFIG_PATH "config." PROJECT_ENDING
 #define CONFIG_INIT_CONTENT \
     "# Simple TUTU config file\n" \
-    "INTERVAL_SECONDS=10\n" \
+    "INTERVAL_SECONDS=60\n" \
     "PROJECT_NAME=Project Example\n" 
 
 /* Snapshot hidden directoy */

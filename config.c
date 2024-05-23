@@ -22,7 +22,7 @@ int read_config(const char *filename, Config *config)
     FILE *file = fopen(filename, "r");
     if (file == NULL)
     {
-        perror("Error opening *.ttu file");
+        perror("Error opening *.tutu file");
         return -1;
     }
 
@@ -36,7 +36,7 @@ int read_config(const char *filename, Config *config)
         char *delimiter = strchr(line, '=');
         if (delimiter == NULL)
         {
-            fprintf(stderr, "Invalid .ttu config line: %s.\n", line);
+            fprintf(stderr, "Invalid .tutu config line: %s.\n", line);
             continue;
         }
 
